@@ -7,7 +7,7 @@ Simple Azure Active Directory Graph API wrapper for Ruby on Rails.
 The API authentication protocol is a service to service call using OAuth2 client credentials. For more information go to
 [Azure Documentation](https://msdn.microsoft.com/en-us/library/azure/dn645543.aspx).
 
-* This library is in alpha. Future incompatible changes may be necessary. *
+**This library is in alpha. Future incompatible changes may be necessary.**
 
 ## Install
 

@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version       = Azure::Directory::VERSION
   spec.authors       = ["Omar Osorio"]
   spec.email         = ["omar@kioru.com"]
-  spec.homepage      = "https://github.com/kiomac/azure-directory"
+  spec.homepage      = "https://github.com/kioru/azure-directory"
 
   spec.summary       = "Azure Active Directory Graph API client for Ruby on Rails"
   spec.description   = "Setup your Rails application with one or multiple clients for Azure AD Graph API using OAuth2 service-to-service calls."
