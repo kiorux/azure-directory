@@ -14,15 +14,18 @@ module Azure
 			##
 			# @param [Symbol] scope (:main) The scope to use with this client.
 			#
-			def initialize(scope = :main)
+			def initialize(scope = :main, &block)
 				@config = Azure::Directory.configuration
 				@config = @config.using(scope) if @config.scope_name != scope
 
 				@oauth = OAuth2::Client.new( @config.client_id, @config.client_secret, 
 					                         :site => 'https://login.windows.net/', 
 					                         :authorize_url =>  "/#{@config.tenant_id}/oauth2/authorize", 
-					                         :token_url => "/#{@config.tenant_id}/oauth2/token" )
-
+					                         :token_url => "/#{@config.tenant_id}/oauth2/token" ) do |faraday|
+					faraday.request :url_encoded
+					faraday.adapter Faraday.default_adapter
+					yield(faraday) if block_given?
+				end
 				
 				if token_hash = @config.load_token
 					@oauth_token = OAuth2::AccessToken.from_hash(@oauth, token_hash)
