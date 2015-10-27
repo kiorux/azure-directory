@@ -81,6 +81,19 @@ module Azure
 
 
 
+			##
+			# Get user groups by user email
+			#
+			# @return [Array]
+			#
+			# @see https://msdn.microsoft.com/en-us/library/azure/hh974483.aspx User
+			def find_user_groups_by_email(email, params = nil)
+				groups = get("/users/#{email}/memberOf", params)
+				groups['value'] if groups.is_a?(Hash)
+			end
+
+
+
 			## 
 			# Creates a unique user on the Active Directory
 			#
