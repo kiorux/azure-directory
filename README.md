@@ -65,6 +65,8 @@ azure = Azure::Directory::Client.new
 
 azure.find_users
 
+azure.find_user_groups_by_email("email")
+
 azure.create_user("email", "given_name", "family_name", "password")
 
 azure.update_user("email", update_data)
