@@ -44,9 +44,7 @@ module Azure
 			# @return [OAuth2::AccessToken] a access token for the current session.
 			#
 			def fetch_access_token!
-				@oauth_token = oauth.get_token( :client_id => config.client_id, 
-					                            :client_secret => config.client_secret, 
-					                            :grant_type => 'client_credentials', 
+				@oauth_token = oauth.get_token( :grant_type => 'client_credentials', 
 					                            :response_type => 'client_credentials', 
 					                            :resource => config.resource_id )
 
