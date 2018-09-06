@@ -63,8 +63,24 @@ module Azure
 			#
 			# @see https://msdn.microsoft.com/en-us/library/azure/hh974483.aspx User
 			def find_users(params = nil)
-				users = get('/users', params)
-				users['value'] if users.is_a?(Hash)
+				users = []
+				response = get('/users', params)
+
+				loop do
+					return nil unless response.is_a?(Hash)
+
+					new_values = response['value']
+					if block_given?
+							new_values.each { |v| yield v }
+					end
+
+					users.concat(new_values)
+
+					break unless response.has_key?('odata.nextLink')
+					response = get(response['odata.nextLink'])
+				end
+
+				users
 			end
 
 
