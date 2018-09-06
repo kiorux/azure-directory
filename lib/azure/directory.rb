@@ -44,11 +44,11 @@ module Azure
 			# @return [OAuth2::AccessToken] a access token for the current session.
 			#
 			def fetch_access_token!
-				@oauth_token = oauth.get_token( :client_id => config.client_id,
-					                            :client_secret => config.client_secret,
-					                            :grant_type => 'client_credentials',
-					                            :response_type => 'client_credentials',
-					                            :resource => config.resource_id )
+				@oauth_token = oauth.get_token( 'client_id' => config.client_id,
+					                            'client_secret' => config.client_secret,
+					                            'grant_type' => 'client_credentials',
+					                            'response_type' => 'client_credentials',
+					                            'resource' => config.resource_id )
 
 				token_hash = { 'access_token' => oauth_token.token, 'token_type' => oauth_token.params['token_type'], 'expires_at' => oauth_token.expires_at }
 				config.save_token(token_hash)
