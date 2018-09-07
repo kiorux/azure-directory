@@ -18,9 +18,9 @@ module Azure
 				@config = Azure::Directory.configuration
 				@config = @config.using(scope) if @config.scope_name != scope
 
-				@oauth = OAuth2::Client.new( @config.client_id, @config.client_secret, 
-					                         :site => 'https://login.windows.net/', 
-					                         :authorize_url =>  "/#{@config.tenant_id}/oauth2/authorize", 
+				@oauth = OAuth2::Client.new( @config.client_id, @config.client_secret,
+					                         :site => 'https://login.windows.net/',
+					                         :authorize_url =>  "/#{@config.tenant_id}/oauth2/authorize",
 					                         :token_url => "/#{@config.tenant_id}/oauth2/token" ) do |faraday|
 					faraday.request :url_encoded
 					faraday.adapter Faraday.default_adapter
@@ -38,17 +38,17 @@ module Azure
 
 
 			##
-			# Do the service-to-service access token request and 
+			# Do the service-to-service access token request and
 			# save it to the Token Store defined in the configuration.
 			#
 			# @return [OAuth2::AccessToken] a access token for the current session.
 			#
 			def fetch_access_token!
-				@oauth_token = oauth.get_token( :client_id => config.client_id, 
-					                            :client_secret => config.client_secret, 
-					                            :grant_type => 'client_credentials', 
-					                            :response_type => 'client_credentials', 
-					                            :resource => config.resource_id )
+				@oauth_token = oauth.get_token( 'client_id' => config.client_id,
+					                            'client_secret' => config.client_secret,
+					                            'grant_type' => 'client_credentials',
+					                            'response_type' => 'client_credentials',
+					                            'resource' => config.resource_id )
 
 				token_hash = { 'access_token' => oauth_token.token, 'token_type' => oauth_token.params['token_type'], 'expires_at' => oauth_token.expires_at }
 				config.save_token(token_hash)
@@ -63,8 +63,24 @@ module Azure
 			#
 			# @see https://msdn.microsoft.com/en-us/library/azure/hh974483.aspx User
 			def find_users(params = nil)
-				users = get('/users', params)
-				users['value'] if users.is_a?(Hash)
+				users = []
+				response = get('/users', params)
+
+				loop do
+					return nil unless response.is_a?(Hash)
+
+					new_values = response['value']
+					if block_given?
+							new_values.each { |v| yield v }
+					end
+
+					users.concat(new_values)
+
+					break unless response.has_key?('odata.nextLink')
+					response = get(response['odata.nextLink'])
+				end
+
+				users
 			end
 
 
@@ -94,15 +110,15 @@ module Azure
 
 
 
-			## 
+			##
 			# Creates a unique user on the Active Directory
 			#
 			# @param [String] email User unique email inside the AD Domain.
-			# @param [String] given_name 
+			# @param [String] given_name
 			# @param [String] family_name
 			# @param [String] password The password will set up with `forceChangePasswordNextLogin = true`by default.
 			# @param [Hash] params If you wish to add or override specific parameters from the Graph API.
-			# 
+			#
 			# @option params [Boolean] 'accountEnabled' (true)
 			# @option params [String] 'displayName' Will concatenate given_name and family_name
 			# @option params [String] 'mailNickname' Username extracted from the email.
@@ -112,7 +128,7 @@ module Azure
 			# @option params [String] 'surname' family_name
 			# @option params [String] 'usageLocation' 'US'
 			#
-			# @return [Hash] The user's information or nil if unsuccessful 
+			# @return [Hash] The user's information or nil if unsuccessful
 			#
 			# @see https://msdn.microsoft.com/en-us/library/azure/hh974483.aspx User
 			#
@@ -155,8 +171,8 @@ module Azure
 			# @return [Hash] The user's information or nil if unsuccessful
 			#
 			def update_user_password(email, password, force_change_password_next_login = true)
-				params = { 'passwordProfile' => { 
-					           'password' => password, 
+				params = { 'passwordProfile' => {
+					           'password' => password,
 					           'forceChangePasswordNextLogin' => force_change_password_next_login } }
 
 				patch("users/#{email}", params) == :no_content
@@ -174,7 +190,7 @@ module Azure
 			##
 			# Assignment of subscriptions for provisioned user account.
 			#
-			# @param [String] sku_part_number Using this name we get the skuId to do the proper assignment. 
+			# @param [String] sku_part_number Using this name we get the skuId to do the proper assignment.
 			#
 			# @example
 			#   assign_license('username@domain.com', 'STANDARDWOFFPACK_STUDENT')
@@ -200,7 +216,7 @@ module Azure
 
 
 
-			private 
+			private
 
 				def get(path, params = nil)
 					request(:get, path, params)
@@ -226,7 +242,7 @@ module Azure
 						unless (error = response.parsed).is_a?(Hash) and error['odata.error']['code'] == 'Request_ResourceNotFound'
 							Rails.logger.error("OAuth2 Error (#{response.status}): #{response.parsed}" )
 						end
-						return nil 
+						return nil
 					end
 					
 					case response.status
